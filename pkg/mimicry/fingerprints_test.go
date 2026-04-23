@@ -3,7 +3,7 @@ package mimicry
 import (
 	"testing"
 
-	"github.com/theodorsm/covert-dtls/pkg/fingerprints"
+	"github.com/Psiphon-Labs/covert-dtls/pkg/fingerprints"
 )
 
 func TestLoadFingerprints(t *testing.T) {

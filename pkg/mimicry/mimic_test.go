@@ -2,7 +2,7 @@ package mimicry
 
 import (
 	"fmt"
-	"github.com/theodorsm/covert-dtls/pkg/utils"
+	"github.com/Psiphon-Labs/covert-dtls/pkg/utils"
 	"testing"
 )
 

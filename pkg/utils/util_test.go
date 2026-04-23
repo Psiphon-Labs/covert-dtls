@@ -6,8 +6,9 @@ import (
 
 func TestShuffle(t *testing.T) {
 	list := []int{1, 2, 3, 4, 5}
+	r := NewPRNG(nil)
 	for i := 1; i < 1000; i++ {
-		shuffled := ShuffleRandomLength(list, true)
+		shuffled := ShuffleRandomLength(list, true, r)
 		if len(shuffled) == 0 {
 			t.Fatalf("Shuffle returned a empty slice")
 		}

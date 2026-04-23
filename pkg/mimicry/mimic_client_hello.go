@@ -4,11 +4,12 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 
+	"github.com/Psiphon-Labs/psiphon-tunnel-core/psiphon/common/prng"
 	"github.com/pion/dtls/v3/pkg/protocol"
 	"github.com/pion/dtls/v3/pkg/protocol/extension"
 	"github.com/pion/dtls/v3/pkg/protocol/handshake"
-	"github.com/theodorsm/covert-dtls/pkg/fingerprints"
-	"github.com/theodorsm/covert-dtls/pkg/utils"
+	"github.com/Psiphon-Labs/covert-dtls/pkg/fingerprints"
+	"github.com/Psiphon-Labs/covert-dtls/pkg/utils"
 )
 
 const handshakeMessageClientHelloVariableWidthStart = 34
@@ -20,6 +21,11 @@ type MimickedClientHello struct {
 	Random                 handshake.Random
 	Cookie                 []byte
 	SessionID              []byte
+
+	// [Psiphon] Seed enables deterministic fingerprint selection in
+	// LoadRandomFingerprint. When non-nil, the same seed always selects
+	// the same fingerprint, enabling replay.
+	Seed *prng.Seed
 
 	CipherSuiteIDs         []uint16
 	CompressionMethods     []*protocol.CompressionMethod
@@ -51,11 +57,17 @@ func (m *MimickedClientHello) LoadFingerprint(fingerprint fingerprints.ClientHel
 	return err
 }
 
-// Loads a random fingerprint to mimic
+// Loads a random fingerprint to mimic.
+// [Psiphon] When Seed is set, the fingerprint is selected deterministically.
 func (m *MimickedClientHello) LoadRandomFingerprint() error {
 	allFingerprints := fingerprints.GetClientHelloFingerprints()
 	length := len(allFingerprints)
-	randomFingerprint := allFingerprints[utils.RandRange(0, length-1)]
+	if length == 0 {
+		return errNoFingerprints
+	}
+
+	r := utils.NewPRNG(m.Seed)
+	randomFingerprint := allFingerprints[r.Intn(length)]
 	return m.LoadFingerprint(randomFingerprint)
 }
 
